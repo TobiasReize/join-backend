@@ -2,7 +2,12 @@ from django.db import models
 
 
 class Summary(models.Model):
-    pass
+    to_do = models.IntegerField(null=True)
+    in_progress = models.IntegerField(null=True)
+    await_feedback = models.IntegerField(null=True)
+    done = models.IntegerField(null=True)
+    urgent = models.IntegerField(null=True)
+    all = models.IntegerField(null=True)
 
 
 class Contact(models.Model):
