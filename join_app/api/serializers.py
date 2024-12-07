@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from datetime import date
+
 from join_app.models import Summary, Contact, Subtask, Task
 
 
@@ -33,20 +35,29 @@ class SummarySerializer(serializers.ModelSerializer):
 
 
 class ContactSerializer(serializers.ModelSerializer):
+    tasks = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='task-detail')
     class Meta:
         model = Contact
-        fields = '__all__'
+        fields = ['first_name', 'last_name', 'email', 'phone', 'checked', 'color', 'tasks']
 
 
 class SubtaskSerializer(serializers.ModelSerializer):
+    status = serializers.ChoiceField(choices=['open', 'done'], style={'base_template': 'select.html'}, initial='open')
+    task = serializers.HyperlinkedRelatedField(read_only=True, view_name='task-detail')
+    task_id = serializers.PrimaryKeyRelatedField(queryset=Task.objects.all(), write_only=True, source='task')
     class Meta:
         model = Subtask
         fields = '__all__'
 
 
 class TaskSerializer(serializers.ModelSerializer):
+    date = serializers.DateField(initial=date.today)
+    column_id = serializers.ChoiceField(choices=['ToDo', 'InProgess', 'AwaitFeedback', 'Done'], style={'base_template': 'select.html'}, initial='ToDo')
+    category = serializers.ChoiceField(choices=['Technical Task', 'User Story'], style={'base_template': 'select.html'}, initial='Technical Task')
+    priority = serializers.ChoiceField(choices=['low', 'medium', 'urgent'], style={'base_template': 'select.html'}, initial='low')
     contacts = serializers.StringRelatedField(many=True, read_only=True)
+    contact_ids = serializers.PrimaryKeyRelatedField(queryset=Contact.objects.all(), many=True, write_only=True, source='contacts')
     subtasks = serializers.StringRelatedField(many=True, read_only=True)
     class Meta:
         model = Task
-        fields = ['column_id', 'category', 'title', 'description', 'date', 'priority', 'contacts', 'subtasks']
+        fields = ['id', 'column_id', 'category', 'title', 'description', 'date', 'priority', 'contacts', 'contact_ids', 'subtasks']
