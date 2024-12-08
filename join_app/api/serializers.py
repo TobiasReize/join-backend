@@ -14,24 +14,25 @@ class SummarySerializer(serializers.ModelSerializer):
     class Meta:
         model = Summary
         fields = '__all__'
+
+
+    def get_all(self, objects):
+        return objects.count()
+
+    def get_to_do(self, objects):
+        return objects.filter(column_id='ToDo').count()
     
-    def get_all(self, obj):
-        return obj.tasks.count()
+    def get_in_progress(self, objects):
+        return objects.filter(column_id='InProgress').count()
     
-    def get_to_do(self, obj):
-        return obj.tasks.filter(column_id='ToDo').count()
+    def get_await_feedback(self, objects):
+        return objects.filter(column_id='AwaitFeedback').count()
     
-    def get_in_progress(self, obj):
-        return obj.tasks.filter(column_id='InProgess').count()
+    def get_done(self, objects):
+        return objects.filter(column_id='Done').count()
     
-    def get_await_feedback(self, obj):
-        return obj.tasks.filter(column_id='AwaitFeedback').count()
-    
-    def get_done(self, obj):
-        return obj.tasks.filter(column_id='Done').count()
-    
-    def get_urgent(self, obj):
-        return obj.tasks.filter(priority='urgent').count()
+    def get_urgent(self, objects):
+        return objects.filter(priority='urgent').count()
 
 
 class ContactSerializer(serializers.ModelSerializer):

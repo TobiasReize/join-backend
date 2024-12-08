@@ -1,13 +1,17 @@
 from .serializers import SummarySerializer, ContactSerializer, SubtaskSerializer, TaskSerializer
 from join_app.models import Summary, Contact, Subtask, Task
 
-from rest_framework import viewsets
-from rest_framework import generics
+from rest_framework import viewsets, generics
+from rest_framework.response import Response
 
 
-class SummaryView(generics.RetrieveAPIView):     # nur GET-Methode (für ein einzelnes Objekt)
-    queryset = Task.objects.all()
-    serializer_class = SummarySerializer
+class SummaryView(viewsets.ViewSet):     # nur GET-Methode
+    def retrieve(self, request, pk=None):
+        queryset = Task.objects.all()
+        serializer = SummarySerializer(queryset)
+        summary = Summary(id=1, **serializer.data)  # dadurch, dass die id immer 1 ist, wird immer das selbe Objekt geupdated! (kein neues erzeugt!)
+        summary.save()
+        return Response(serializer.data)
 
 
 class ContactViewSet(viewsets.ModelViewSet):

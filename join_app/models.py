@@ -28,7 +28,7 @@ class Task(models.Model):
     title = models.CharField(max_length=100)
     description = models.TextField()
     date = models.DateField()
-    contacts = models.ManyToManyField(Contact, related_name='tasks')                        # many-to-many: ein Task kann mehrere Kontakte haben und ein Kontakt kann mehreren Tasks zugeordnet sein!
+    contacts = models.ManyToManyField(Contact, related_name='tasks')           # many-to-many: ein Task kann mehrere Kontakte haben und ein Kontakt kann mehreren Tasks zugeordnet sein!
     priority = models.CharField(max_length=100)     # oder auch ForeignKey?
 
     def __str__(self):

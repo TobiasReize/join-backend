@@ -12,5 +12,5 @@ router.register(r'tasks', TaskViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('summary/', SummaryView.as_view())
+    path('summary/', SummaryView.as_view({'get': 'retrieve'}))
 ]
