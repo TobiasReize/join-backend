@@ -1,7 +1,7 @@
-from .serializers import SummarySerializer, ContactSerializer, SubtaskSerializer, TaskSerializer
+from .serializers import SummarySerializer, ContactSerializer, SubtaskSerializer, TaskSerializer, TaskCreateSerializer
 from join_app.models import Summary, Contact, Subtask, Task
 
-from rest_framework import viewsets, generics
+from rest_framework import viewsets
 from rest_framework.response import Response
 
 
@@ -25,5 +25,15 @@ class SubtaskViewSet(viewsets.ModelViewSet):
 
 
 class TaskViewSet(viewsets.ModelViewSet):
-    queryset = Task.objects.all()
+    queryset = Task.objects.all()   # sind die Daten aus der Datenbank!
     serializer_class = TaskSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = TaskCreateSerializer(data=request.data, many=True)   # aktuell werden immer alle Tasks hochgeladen! (daher many=True)
+        print("serializer (View):", request.data)
+        if serializer.is_valid(raise_exception=True):
+            print("serializer is valid (View)! serializer.data:", serializer.data)
+            Task.objects.all().delete()     # zunächst werden alle Tasks aus der Datenbank gelöscht (um danach wieder alle zu erstellen!)
+            serializer.save()               # hier werden alle Task-Objekte erstellt?!
+        else: print("serializer is not valid!", serializer.data)
+        return Response(serializer.data)
