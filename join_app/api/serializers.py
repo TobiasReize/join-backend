@@ -20,19 +20,19 @@ class SummarySerializer(serializers.ModelSerializer):
         return objects.count()
 
     def get_to_do(self, objects):
-        number_to_do = objects.filter(column_id='ToDo').count()
+        number_to_do = objects.filter(columnID='ToDo').count()
         return number_to_do
     
     def get_in_progress(self, objects):
-        number_in_progress = objects.filter(column_id='InProgress').count()
+        number_in_progress = objects.filter(columnID='InProgress').count()
         return number_in_progress
     
     def get_await_feedback(self, objects):
-        number_await_feedback = objects.filter(column_id='AwaitFeedback').count()
+        number_await_feedback = objects.filter(columnID='AwaitFeedback').count()
         return number_await_feedback
     
     def get_done(self, objects):
-        number_done = objects.filter(column_id='Done').count()
+        number_done = objects.filter(columnID='Done').count()
         return number_done
     
     def get_urgent(self, objects):
@@ -98,20 +98,17 @@ class TaskListSerializer(serializers.ListSerializer):
 
             # Subtasks:
             task_subtasks = []        # ist eine Liste mit Subtask-Dictionaries
-            print('item.keys():', item.keys())
             if 'taskSubtasks' in item.keys():
                 subtasks_list = item.pop('taskSubtasks')
-                print('subtasks_list:', subtasks_list)
                 for subtask_data in subtasks_list:
-                    subtask = Subtask(**subtask_data)       # hier werden die Subtask-Objekte neu erzeugt! (und in der Datenbank gespeichert!)
-                    subtask.save()
+                    subtask = Subtask(**subtask_data)   # hier wird das neue Subtask-Objekt erzeugt! (aber nicht gespeichert! Dies wird durch die set-Methode mit bulk=False gemacht!)
                     task_subtasks.append(subtask)
             print('task_subtasks:', task_subtasks)
 
             # Tasks:
             task = Task.objects.create(priority=task_priority, **item)     # ein einzelnes Task-Objekt wird mit den Daten erstellt (und gleich in die Datenbank gespeichert?)
             task.contacts.set(task_contacts)    # die Kontakte dürfen nicht beim Erstellen des Task-Objektes enthalten sein (wegen many-to-many)! Daher wird es nachträglich mit der set() Methode gemacht!
-            task.subtasks.set(task_subtasks)
+            task.subtasks.set(task_subtasks, bulk=False)    # mit bulk=False werden die neuen Subtask-objekte in der Datenbank gespeichert! (die save-Methode wird ausgeführt!)
             new_tasks.append(task)      # die einzelnen Task-Objekte werden in einer Liste gespeichert!
         return new_tasks
 
