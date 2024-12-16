@@ -44,7 +44,7 @@ class ContactSerializer(serializers.ModelSerializer):
     tasks = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='task-detail')
     class Meta:
         model = Contact
-        fields = ['first_name', 'last_name', 'email', 'phone', 'checked', 'color', 'tasks']
+        fields = ['firstName', 'lastName', 'mail', 'tel', 'checked', 'color', 'tasks']
 
 
 class SubtaskSerializer(serializers.ModelSerializer):
@@ -58,53 +58,73 @@ class SubtaskSerializer(serializers.ModelSerializer):
 
 class TaskSerializer(serializers.ModelSerializer):
     date = serializers.DateField(initial=date.today)
-    column_id = serializers.ChoiceField(choices=['ToDo', 'InProgess', 'AwaitFeedback', 'Done'], style={'base_template': 'select.html'}, initial='ToDo')
+    columnID = serializers.ChoiceField(choices=['ToDo', 'InProgess', 'AwaitFeedback', 'Done'], style={'base_template': 'select.html'}, initial='ToDo')
     category = serializers.ChoiceField(choices=['Technical Task', 'User Story'], style={'base_template': 'select.html'}, initial='Technical Task')
     priority = serializers.ChoiceField(choices=['low', 'medium', 'urgent'], style={'base_template': 'select.html'}, initial='low')
     contacts = serializers.StringRelatedField(many=True, read_only=True)
     contact_ids = serializers.PrimaryKeyRelatedField(queryset=Contact.objects.all(), many=True, write_only=True, source='contacts')
     subtasks = serializers.StringRelatedField(many=True, read_only=True)
-    subtask_ids = serializers.PrimaryKeyRelatedField(queryset=Subtask.objects.all(), many=True, write_only=True, source='subtasks')
+    # subtask_ids = serializers.PrimaryKeyRelatedField(queryset=Subtask.objects.all(), many=True, write_only=True, source='subtasks')
 
     class Meta:
         model = Task
-        fields = ['id', 'column_id', 'category', 'title', 'description', 'date', 'priority', 'contacts', 'contact_ids', 'subtasks', 'subtask_ids']
+        fields = ['id', 'columnID', 'category', 'title', 'description', 'date', 'priority', 'contacts', 'contact_ids', 'subtasks']
 
 
 class TaskListSerializer(serializers.ListSerializer):
 
     def create(self, validated_data):   # validated_data ist eine Liste mit Dictionaries --> [{...}, {...}, ...] (jedes Dict ist hierbei eine vollständige Task!)
         print("validated_data (TaskListSerializer):", validated_data)
+        all_contacts = Contact.objects.all()
         new_tasks = []
+        
         for item in validated_data:     # Haupt-For-Schleife zum Behandeln jedes einzelne Task-Objekt
-            priority_obj = item.pop('priority')     # ist ein Dictionary: {"low":false,"medium":false,"urgent":true}
+            
+            # Priority:
+            priority_obj = item.pop('priority')     # ist ein Dictionary: {"low":False,"medium":False,"urgent":True}
             for key in priority_obj.keys():         # Schleife zum Bestimmen der Priorität
                 if priority_obj[key]:
                     task_priority = key
                     break
             print("priority is:", task_priority)
+            
+            # Contacts:
             contacts_list = item.pop('contacts')       # ist eine Liste mit Dictionaries: [{"checked":true,"color":"#6E52FF","firstName":"Charlie","lastName":"Brown","mail":"charlie.brown@example.com","tel":"+49 151 34567890"}, {...}
             task_contacts = []
             for contact_data in contacts_list:                  # Schleife zum Erstellen der einzelnen Kontakte (werden in der task_contacts Liste gespeichert)
-                contact = Contact(**contact_data)
-                contact.save()                              # der neue Kontakt muss in der Datenbank gespeichert werden! --> erstellt immer einen neuen Kontakt...?
+                contact = all_contacts.get(firstName=contact_data['firstName'], lastName=contact_data['lastName'], mail=contact_data['mail'], tel=contact_data['tel'], color=contact_data['color'], checked=contact_data['checked'])
                 task_contacts.append(contact)
             print("task_contacts:", task_contacts)
 
+            # Subtasks:
+            task_subtasks = []        # ist eine Liste mit Subtask-Dictionaries
+            print('item.keys():', item.keys())
+            if 'taskSubtasks' in item.keys():
+                subtasks_list = item.pop('taskSubtasks')
+                print('subtasks_list:', subtasks_list)
+                for subtask_data in subtasks_list:
+                    subtask = Subtask(**subtask_data)       # hier werden die Subtask-Objekte neu erzeugt! (und in der Datenbank gespeichert!)
+                    subtask.save()
+                    task_subtasks.append(subtask)
+            print('task_subtasks:', task_subtasks)
+
+            # Tasks:
             task = Task.objects.create(priority=task_priority, **item)     # ein einzelnes Task-Objekt wird mit den Daten erstellt (und gleich in die Datenbank gespeichert?)
             task.contacts.set(task_contacts)    # die Kontakte dürfen nicht beim Erstellen des Task-Objektes enthalten sein (wegen many-to-many)! Daher wird es nachträglich mit der set() Methode gemacht!
+            task.subtasks.set(task_subtasks)
             new_tasks.append(task)      # die einzelnen Task-Objekte werden in einer Liste gespeichert!
         return new_tasks
 
 
 class TaskCreateSerializer(serializers.ModelSerializer):          # bei einem neuen Task, wird zuerst die Task-Instanz (inkl. Kontakte) ohne Subtask erstellt und dann muss im Subtask-Serializer die Subtask-Instanz erstellt und die Task-ID zugewiesen werden!
     date = serializers.DateField(initial=date.today)
-    column_id = serializers.ChoiceField(choices=['ToDo', 'InProgess', 'AwaitFeedback', 'Done'], style={'base_template': 'select.html'}, initial='ToDo')
+    columnID = serializers.ChoiceField(choices=['ToDo', 'InProgess', 'AwaitFeedback', 'Done'], style={'base_template': 'select.html'}, initial='ToDo')
     category = serializers.ChoiceField(choices=['Technical Task', 'User Story'], style={'base_template': 'select.html'}, initial='Technical Task')
     priority = serializers.DictField(child=serializers.BooleanField())
     contacts = ContactSerializer(many=True)     # darf nicht "read_only=True" sein, sonst sind die Daten nicht in "validated_data" vorhanden!
+    taskSubtasks = serializers.ListSerializer(required=False, child=serializers.DictField(child=serializers.CharField()))
 
     class Meta:
         model = Task
-        fields = ['id', 'column_id', 'category', 'title', 'description', 'date', 'priority', 'contacts']
+        fields = ['id', 'columnID', 'category', 'title', 'description', 'date', 'priority', 'contacts', 'taskSubtasks']
         list_serializer_class = TaskListSerializer

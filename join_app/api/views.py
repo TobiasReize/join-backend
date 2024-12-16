@@ -34,6 +34,6 @@ class TaskViewSet(viewsets.ModelViewSet):
         if serializer.is_valid(raise_exception=True):
             print("serializer is valid (View)! serializer.data:", serializer.data)
             Task.objects.all().delete()     # zunächst werden alle Tasks aus der Datenbank gelöscht (um danach wieder alle zu erstellen!)
-            serializer.save()               # hier werden alle Task-Objekte erstellt?!
+            serializer.save()               # hier werden alle Task-Objekte erstellt! (durch den Serializer)
         else: print("serializer is not valid!", serializer.data)
         return Response(serializer.data)
