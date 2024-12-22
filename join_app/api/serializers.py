@@ -42,11 +42,12 @@ class SummarySerializer(serializers.ModelSerializer):
 
 class SubtaskSerializer(serializers.ModelSerializer):
     status = serializers.ChoiceField(choices=['open', 'done'], style={'base_template': 'select.html'}, initial='open')
-    # task = serializers.HyperlinkedRelatedField(read_only=True, view_name='task-detail')
+    task = serializers.HyperlinkedRelatedField(read_only=True, view_name='task-detail')
     # task_id = serializers.PrimaryKeyRelatedField(queryset=Task.objects.all(), write_only=True, source='task')
+    id = serializers.IntegerField()
     class Meta:
         model = Subtask
-        fields = '__all__'
+        fields = ['id', 'subtaskTitle', 'status', 'task']
 
 
 class ContactSerializer(serializers.ModelSerializer):
@@ -61,7 +62,7 @@ class TaskSerializer(serializers.ModelSerializer):
     columnID = serializers.ChoiceField(choices=['ToDo', 'InProgress', 'AwaitFeedback', 'Done'], style={'base_template': 'select.html'}, initial='ToDo')
     category = serializers.ChoiceField(choices=['Technical Task', 'User Story'], style={'base_template': 'select.html'}, initial='Technical Task')
     priority = serializers.ChoiceField(choices=['low', 'medium', 'urgent'], style={'base_template': 'select.html'}, initial='low')
-    contacts = serializers.StringRelatedField(many=True, read_only=True)
+    contacts = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     contact_ids = serializers.PrimaryKeyRelatedField(queryset=Contact.objects.all(), many=True, write_only=True, source='contacts')
     subtasks = SubtaskSerializer(many=True)
 
@@ -71,7 +72,7 @@ class TaskSerializer(serializers.ModelSerializer):
 
 
     def create(self, validated_data):
-        task_contacts = validated_data.pop('contacts') 
+        task_contacts = validated_data.pop('contacts')
         subtasks_list = validated_data.pop('subtasks')
         task_subtasks = [Subtask(**item) for item in subtasks_list]
         task = Task.objects.create(**validated_data)
@@ -90,36 +91,39 @@ class TaskSerializer(serializers.ModelSerializer):
         instance.date = validated_data.get('date', instance.date)
         instance.priority = validated_data.get('priority', instance.priority)
         
-        # Update contacts if provided
+        # Update contacts:
         if 'contacts' in validated_data:
             contact_ids = validated_data.pop('contacts')
             instance.contacts.set(contact_ids)
 
-        # Update subtasks if provided
+        # Update/ create subtasks:
         if 'subtasks' in validated_data:
             subtasks_data = validated_data.pop('subtasks')
-            existing_subtasks = list(instance.subtasks.all())
-        
-        # Iterate through validated_data and existing_subtasks to update or create
-        for i, subtask_data in enumerate(subtasks_data):
-            if i < len(existing_subtasks):
-                # Update existing subtask
-                subtask_instance = existing_subtasks[i]
-                subtask_instance.subtaskTitle = subtask_data.get('subtaskTitle', subtask_instance.subtaskTitle)
-                subtask_instance.status = subtask_data.get('status', subtask_instance.status)
-                subtask_instance.save()
-            else:
-                # Create new subtask
-                Subtask.objects.create(
-                    task=instance,
-                    subtaskTitle=subtask_data.get('subtaskTitle'),
-                    status=subtask_data.get('status')
-                )
+            existing_subtasks = Subtask.objects.filter(task_id=instance.id)
 
-        # Remove any remaining existing subtasks if there are more than in the input data
-        if len(subtasks_data) < len(existing_subtasks):
-            for subtask_to_delete in existing_subtasks[len(subtasks_data):]:
-                subtask_to_delete.delete()
+            for subtask in subtasks_data:
+                try:
+                    subtask_instance = Subtask.objects.get(id=subtask['id'])
+                except:
+                    subtask_instance = None
+                
+                if subtask_instance:    # für vorhandene subtasks
+                    subtask_instance.subtaskTitle = subtask.get('subtaskTitle', subtask_instance.subtaskTitle)
+                    subtask_instance.status = subtask.get('status', subtask_instance.status)
+                    subtask_instance.save()
+                else:   # für neu hinzugefügte subtasks
+                    Subtask.objects.create(
+                        task=instance,
+                        subtaskTitle=subtask.get('subtaskTitle'),
+                        status=subtask.get('status')
+                    )
+
+            # Delete subtasks:
+            if len(subtasks_data) < len(existing_subtasks):
+                subtasks_data_keys = [data['id'] for data in subtasks_data]
+                for subtask in existing_subtasks:
+                    if subtask.id not in subtasks_data_keys:
+                        subtask.delete()
 
         instance.save()
         return instance
