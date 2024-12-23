@@ -43,8 +43,7 @@ class SummarySerializer(serializers.ModelSerializer):
 class SubtaskSerializer(serializers.ModelSerializer):
     status = serializers.ChoiceField(choices=['open', 'done'], style={'base_template': 'select.html'}, initial='open')
     task = serializers.HyperlinkedRelatedField(read_only=True, view_name='task-detail')
-    # task_id = serializers.PrimaryKeyRelatedField(queryset=Task.objects.all(), write_only=True, source='task')
-    id = serializers.IntegerField()
+    id = serializers.IntegerField(required=False)
     class Meta:
         model = Subtask
         fields = ['id', 'subtaskTitle', 'status', 'task']
@@ -72,6 +71,7 @@ class TaskSerializer(serializers.ModelSerializer):
 
 
     def create(self, validated_data):
+        print('validated_data (TaskSerializer):', validated_data)
         task_contacts = validated_data.pop('contacts')
         subtasks_list = validated_data.pop('subtasks')
         task_subtasks = [Subtask(**item) for item in subtasks_list]
@@ -83,7 +83,6 @@ class TaskSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         print('validated_data (TaskSerializer):', validated_data)
-        
         instance.columnID = validated_data.get('columnID', instance.columnID)
         instance.category = validated_data.get('category', instance.category)
         instance.title = validated_data.get('title', instance.title)
@@ -120,9 +119,9 @@ class TaskSerializer(serializers.ModelSerializer):
 
             # Delete subtasks:
             if len(subtasks_data) < len(existing_subtasks):
-                subtasks_data_keys = [data['id'] for data in subtasks_data]
+                subtasks_data_ids = [data['id'] for data in subtasks_data]
                 for subtask in existing_subtasks:
-                    if subtask.id not in subtasks_data_keys:
+                    if subtask.id not in subtasks_data_ids:
                         subtask.delete()
 
         instance.save()
