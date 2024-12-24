@@ -26,7 +26,7 @@ class Task(models.Model):
     columnID = models.CharField(max_length=100)
     category = models.CharField(max_length=100)
     title = models.CharField(max_length=100)
-    description = models.TextField()
+    description = models.TextField(blank=True)
     date = models.DateField()
     contacts = models.ManyToManyField(Contact, related_name='tasks')           # many-to-many: ein Task kann mehrere Kontakte haben und ein Kontakt kann mehreren Tasks zugeordnet sein!
     priority = models.CharField(max_length=100)
