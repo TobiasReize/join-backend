@@ -6,15 +6,14 @@ from django.contrib.auth.models import User
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
-        fields = ['id', 'user']
+        fields = ['first_name', 'last_name', 'email', 'user']
+        # fields = '__all__'
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
-    # repeated_password = serializers.CharField(write_only=True)  # write_only=True damit es nicht wieder zurückgegeben wird!
-    
     class Meta:
         model = User
-        fields = ['username', 'email', 'password']
+        fields = ['first_name', 'last_name', 'email', 'password']
         extra_kwargs = {
             'password': {
                 'write_only': True      # damit das password auch nur write_only=True ist!
@@ -22,11 +21,12 @@ class RegistrationSerializer(serializers.ModelSerializer):
         }
     
     def save(self):     # save-Methode wird überschrieben
+        print('self.validated_data:', self.validated_data)
+        user_name = self.validated_data['email']    # username=email (für Login)
+        f_name = self.validated_data['first_name']
+        l_name = self.validated_data['last_name']
+        mail = self.validated_data['email']
         pw = self.validated_data['password']
-        # repeated_pw = self.validated_data['repeated_password']
-
-        # if pw != repeated_pw:
-        #     raise serializers.ValidationError({'error': 'Passwords don\'t match'})
         
         try:    # es wird geprüft ob die Email bereits vorhanden ist!
             existing_user = User.objects.get(email=self.validated_data['email'])
@@ -37,7 +37,9 @@ class RegistrationSerializer(serializers.ModelSerializer):
             print('existing User with that email: ', existing_user)
             raise serializers.ValidationError({'error': 'Email already exists!'})
         else:
-            account = User(email=self.validated_data['email'], username=self.validated_data['username'])    # neues User-Objekt wird erstellt!
+            account = User(username=user_name, first_name=f_name, last_name=l_name, email=mail, is_staff=True)    # neues User-Objekt wird erstellt!
             account.set_password(pw)    # von diesem User wird das Passwort gesetzt!
             account.save()
+            user_profil = UserProfile.objects.create(user=account, first_name=f_name, last_name=l_name, email=mail)
+            print('user_profil:', user_profil)
             return account

@@ -9,12 +9,12 @@ from rest_framework.response import Response
 from rest_framework.authtoken.views import ObtainAuthToken
 
 
-class UserProfileList(generics.ListCreateAPIView):
+class UserProfileList(generics.ListAPIView):
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
 
 
-class UserProfileDetail(generics.RetrieveUpdateDestroyAPIView):
+class UserProfileDetail(generics.RetrieveAPIView):
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
 
@@ -32,6 +32,8 @@ class RegistrationView(APIView):
             data = {
                 'token': token.key,
                 'username': saved_account.username,
+                'first_name': saved_account.first_name,
+                'last_name': saved_account.last_name,
                 'email': saved_account.email
             }
         else:
@@ -39,7 +41,7 @@ class RegistrationView(APIView):
         return Response(data)
 
 
-class CustomLoginView(ObtainAuthToken):
+class CustomLoginView(ObtainAuthToken):     # username und password sind erforderlich!
     permission_classes = [AllowAny]
 
     def post(self, request):    # Funktion wird nur bei einem POST-Request ausgeführt!
@@ -52,7 +54,10 @@ class CustomLoginView(ObtainAuthToken):
             data = {
                 'token': token.key,
                 'username': user.username,
-                'email': user.email
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'email': user.email,
+                'user_id': user.id
             }
         else:
             data = serializer.errors
