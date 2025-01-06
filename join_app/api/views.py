@@ -5,11 +5,11 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 
 
-class SummaryView(viewsets.ViewSet):     # nur GET-Methode
+class SummaryView(viewsets.ViewSet):
     def retrieve(self, request, pk=None):
         queryset = Task.objects.all()
         serializer = SummarySerializer(queryset)
-        summary = Summary(id=1, **serializer.data)  # dadurch, dass die id immer 1 ist, wird immer das selbe Objekt geupdated! (kein neues erzeugt!)
+        summary = Summary(id=1, **serializer.data)
         summary.save()
         return Response(serializer.data)
 

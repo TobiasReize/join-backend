@@ -28,7 +28,7 @@ class Task(models.Model):
     title = models.CharField(max_length=100)
     description = models.TextField(blank=True)
     date = models.DateField()
-    contacts = models.ManyToManyField(Contact, related_name='tasks')           # many-to-many: ein Task kann mehrere Kontakte haben und ein Kontakt kann mehreren Tasks zugeordnet sein!
+    contacts = models.ManyToManyField(Contact, related_name='tasks')
     priority = models.CharField(max_length=100)
 
     def __str__(self):
@@ -38,7 +38,7 @@ class Task(models.Model):
 class Subtask(models.Model):
     status = models.CharField(max_length=100)
     subtaskTitle = models.CharField(max_length=100)
-    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='subtasks')   # one-to-many: ein Task kann mehrere Subtasks haben aber ein Subtask gehört nur zu einem bestimmten Task!
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='subtasks')
 
     def __str__(self):
         return f"{self.status}: {self.subtaskTitle}"

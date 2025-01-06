@@ -20,15 +20,15 @@ class UserProfileDetail(generics.RetrieveAPIView):
 
 
 class RegistrationView(APIView):
-    permission_classes = [AllowAny]     # wenn man sich registrieren möchte, ist man noch nicht authentisiert! (daher AllowAny)
+    permission_classes = [AllowAny]
 
-    def post(self, request):    # Funktion wird nur bei einem POST-Request ausgeführt!
+    def post(self, request):
         serializer = RegistrationSerializer(data=request.data)
         data = {}
 
         if serializer.is_valid():
-            saved_account = serializer.save()     # Rückgabewert der save-Methode wird gespeichert! (ist das neue User-Objekt/ Account)
-            token, created = Token.objects.get_or_create(user=saved_account)     # hier wird der Auth-Token für den neuen User erstellt! (es wird ein Tupel zurückgegeben!)
+            saved_account = serializer.save()
+            token, created = Token.objects.get_or_create(user=saved_account)
             data = {
                 'token': token.key,
                 'username': saved_account.username,
@@ -41,16 +41,16 @@ class RegistrationView(APIView):
         return Response(data)
 
 
-class CustomLoginView(ObtainAuthToken):     # username und password sind erforderlich!
+class CustomLoginView(ObtainAuthToken):
     permission_classes = [AllowAny]
 
-    def post(self, request):    # Funktion wird nur bei einem POST-Request ausgeführt!
-        serializer = self.serializer_class(data=request.data)   # es wird der Serializer von der Django-View "ObtainAuthToken" verwendet!
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
         data = {}
 
         if serializer.is_valid():
-            user = serializer.validated_data['user']    # der bestehende User wird gezogen!
-            token, created = Token.objects.get_or_create(user=user)     # Falls ein User noch kein Token hat, wird er hier erstellt! (es wird ein Tupel zurückgegeben!)
+            user = serializer.validated_data['user']
+            token, created = Token.objects.get_or_create(user=user)
             data = {
                 'token': token.key,
                 'username': user.username,

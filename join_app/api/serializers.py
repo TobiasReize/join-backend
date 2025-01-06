@@ -77,52 +77,59 @@ class TaskSerializer(serializers.ModelSerializer):
         task_subtasks = [Subtask(**item) for item in subtasks_list]
         task = Task.objects.create(**validated_data)
         task.contacts.set(task_contacts)
-        task.subtasks.set(task_subtasks, bulk=False)    # mit bulk=False werden die neuen Subtask-Objekte in der Datenbank gespeichert! (die save-Methode wird ausgeführt!)
+        task.subtasks.set(task_subtasks, bulk=False)
         return task
     
 
     def update(self, instance, validated_data):
         print('validated_data (TaskSerializer):', validated_data)
+        self.update_task(instance, validated_data)
+        
+        if 'contacts' in validated_data:
+            contact_ids = validated_data.pop('contacts')
+            instance.contacts.set(contact_ids)
+
+        if 'subtasks' in validated_data:
+            subtasks_data = validated_data.pop('subtasks')
+            existing_subtasks = Subtask.objects.filter(task_id=instance.id)
+            self.update_create_subtasks(instance, subtasks_data)
+            self.delete_subtasks(subtasks_data, existing_subtasks)
+
+        instance.save()
+        return instance
+
+
+    def update_task(self, instance, validated_data):
         instance.columnID = validated_data.get('columnID', instance.columnID)
         instance.category = validated_data.get('category', instance.category)
         instance.title = validated_data.get('title', instance.title)
         instance.description = validated_data.get('description', instance.description)
         instance.date = validated_data.get('date', instance.date)
         instance.priority = validated_data.get('priority', instance.priority)
-        
-        # Update contacts:
-        if 'contacts' in validated_data:
-            contact_ids = validated_data.pop('contacts')
-            instance.contacts.set(contact_ids)
 
-        # Update/ create subtasks:
-        if 'subtasks' in validated_data:
-            subtasks_data = validated_data.pop('subtasks')
-            existing_subtasks = Subtask.objects.filter(task_id=instance.id)
 
-            for subtask in subtasks_data:
-                try:
-                    subtask_instance = Subtask.objects.get(id=subtask['id'])
-                except:
-                    subtask_instance = None
-                
-                if subtask_instance:    # für vorhandene subtasks
-                    subtask_instance.subtaskTitle = subtask.get('subtaskTitle', subtask_instance.subtaskTitle)
-                    subtask_instance.status = subtask.get('status', subtask_instance.status)
-                    subtask_instance.save()
-                else:   # für neu hinzugefügte subtasks
-                    Subtask.objects.create(
-                        task=instance,
-                        subtaskTitle=subtask.get('subtaskTitle'),
-                        status=subtask.get('status')
-                    )
+    def update_create_subtasks(self, instance, subtasks_data):
+        for subtask in subtasks_data:
+            try:
+                subtask_instance = Subtask.objects.get(id=subtask['id'])
+            except:
+                subtask_instance = None
+            
+            if subtask_instance:
+                subtask_instance.subtaskTitle = subtask.get('subtaskTitle', subtask_instance.subtaskTitle)
+                subtask_instance.status = subtask.get('status', subtask_instance.status)
+                subtask_instance.save()
+            else:
+                Subtask.objects.create(
+                    task=instance,
+                    subtaskTitle=subtask.get('subtaskTitle'),
+                    status=subtask.get('status')
+                )
 
-            # Delete subtasks:
-            if len(subtasks_data) < len(existing_subtasks):
-                subtasks_data_ids = [data['id'] for data in subtasks_data]
-                for subtask in existing_subtasks:
-                    if subtask.id not in subtasks_data_ids:
-                        subtask.delete()
 
-        instance.save()
-        return instance
+    def delete_subtasks(self, subtasks_data, existing_subtasks):
+        if len(subtasks_data) < len(existing_subtasks):
+            subtasks_data_ids = [data['id'] for data in subtasks_data]
+            for subtask in existing_subtasks:
+                if subtask.id not in subtasks_data_ids:
+                    subtask.delete()

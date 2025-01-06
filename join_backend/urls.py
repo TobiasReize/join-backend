@@ -19,7 +19,7 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include('join_app.api.urls')),             # join_app
-    path('api/auth/', include('user_auth_app.api.urls')),   # user_auth_app
-    path('api-auth/', include('rest_framework.urls')),      # für den APIView-Login
+    path('api/', include('join_app.api.urls')),
+    path('api/auth/', include('user_auth_app.api.urls')),
+    path('api-auth/', include('rest_framework.urls')),
 ]
