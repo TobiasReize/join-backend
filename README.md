@@ -10,12 +10,13 @@ This project is part of the Join-200 (Frontend).
 ```
     git clone <GitHub repository link>
 ```
+
 2. Create a virtual environment (in the project folder):
 ```
     python -m venv env
 ```
 
-3. Install the dependencies:
+3. Install the dependencies:<br/>
 activate the virtual environment
 ```
     pip install -r requirements.txt
