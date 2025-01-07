@@ -2,5 +2,32 @@
 
 ## A Django-based Backend project for a task management application. You can managing categories, tasks, subtasks and users. It provides REST-API endpoints for CRUD operations and user authentication.
 
+This project is part of the Join-200 (Frontend).
 
-This project is part of the Join Frontend.
+## How to install this repository (Backend):
+
+1. Clone this repository:
+```
+    git clone <GitHub repository link>
+```
+2. Create a virtual environment (in the project folder):
+```
+    python -m venv env
+```
+
+3. Install the dependencies:
+activate the virtual environment
+```
+    pip install -r requirements.txt
+```
+
+4. Start the development server (on path: 127.0.0.1:8000):
+```
+    python manage.py runserver
+```
+
+5. Apply migrations:
+```
+    python manage.py makemigrations
+    python manage.py migrate
+```
