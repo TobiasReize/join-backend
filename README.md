@@ -32,3 +32,6 @@ activate the virtual environment
     python manage.py makemigrations
     python manage.py migrate
 ```
+
+6. Start Join-200 (Frontend):<br/>
+clone the repository and run the liveserver on path 127.0.0.1:5500
