@@ -12,7 +12,7 @@ class Summary(models.Model):
 
 class Contact(models.Model):
     firstName = models.CharField(max_length=100)
-    lastName = models.CharField(max_length=100)
+    lastName = models.CharField(max_length=100, blank=True, null=True)
     mail = models.EmailField()
     tel = models.CharField(max_length=100)
     checked = models.BooleanField(default=False)
