@@ -1,0 +1,237 @@
+[
+    {
+        "model": "join_app.contact",
+        "pk": 1,
+        "fields": {
+            "firstName": "Max",
+            "lastName": "Mustermann",
+            "mail": "max@test.de",
+            "tel": "02178129839",
+            "checked": false,
+            "color": "#9747FF"
+        }
+    },
+    {
+        "model": "join_app.contact",
+        "pk": 2,
+        "fields": {
+            "firstName": "Erika",
+            "lastName": "Musterfrau",
+            "mail": "erika@dev.de",
+            "tel": "0111111111",
+            "checked": false,
+            "color": "#FF5EB3"
+        }
+    },
+    {
+        "model": "join_app.contact",
+        "pk": 3,
+        "fields": {
+            "firstName": "Hans",
+            "lastName": "Lustig",
+            "mail": "hans@dev.com",
+            "tel": "01234567890",
+            "checked": false,
+            "color": "#6E52FF"
+        }
+    },
+    {
+        "model": "join_app.contact",
+        "pk": 4,
+        "fields": {
+            "firstName": "Klaus",
+            "lastName": "Kleber",
+            "mail": "klaus@user.com",
+            "tel": "09876543210",
+            "checked": false,
+            "color": "#9327FF"
+        }
+    },
+    {
+        "model": "join_app.contact",
+        "pk": 5,
+        "fields": {
+            "firstName": "Kim",
+            "lastName": "Leicht",
+            "mail": "kim@test.com",
+            "tel": "034985743034",
+            "checked": false,
+            "color": "#00BEE8"
+        }
+    },
+    {
+        "model": "join_app.contact",
+        "pk": 6,
+        "fields": {
+            "firstName": "Jonas",
+            "lastName": "Mueller",
+            "mail": "joni@test.de",
+            "tel": "0354637678",
+            "checked": false,
+            "color": "#1FD7C1"
+        }
+    },
+    {
+        "model": "join_app.contact",
+        "pk": 7,
+        "fields": {
+            "firstName": "Tim",
+            "lastName": "Gross",
+            "mail": "tim@user.de",
+            "tel": "0222222223",
+            "checked": false,
+            "color": "#FF745E"
+        }
+    },
+    {
+        "model": "join_app.contact",
+        "pk": 8,
+        "fields": {
+            "firstName": "Xaver",
+            "lastName": "Stein",
+            "mail": "xaver@dev.de",
+            "tel": "0333343434",
+            "checked": false,
+            "color": "#FC71FF"
+        }
+    },
+    {
+        "model": "join_app.contact",
+        "pk": 9,
+        "fields": {
+            "firstName": "Emilie",
+            "lastName": "Schwer",
+            "mail": "emi@test.de",
+            "tel": "03240005699",
+            "checked": false,
+            "color": "#FFC701"
+        }
+    },
+    {
+        "model": "join_app.contact",
+        "pk": 10,
+        "fields": {
+            "firstName": "Bernd",
+            "lastName": "Schuster",
+            "mail": "bernd@dev.de",
+            "tel": "01234456677",
+            "checked": false,
+            "color": "#0038FF"
+        }
+    },
+    {
+        "model": "join_app.task",
+        "pk": 1,
+        "fields": {
+            "columnID": "ToDo",
+            "category": "Technical Task",
+            "title": "Rechner aktualisieren",
+            "description": "Portionsrechner mit den aktuellen Daten aktualisieren",
+            "date": "2025-03-12",
+            "priority": "low",
+            "contacts": [1, 2]
+        }
+    },
+    {
+        "model": "join_app.task",
+        "pk": 2,
+        "fields": {
+            "columnID": "InProgress",
+            "category": "User Story",
+            "title": "CSS Klassen",
+            "description": "Standard CSS Klassen implementieren",
+            "date": "2025-03-09",
+            "priority": "medium",
+            "contacts": [3, 4, 5]
+        }
+    },
+    {
+        "model": "join_app.task",
+        "pk": 3,
+        "fields": {
+            "columnID": "AwaitFeedback",
+            "category": "User Story",
+            "title": "Figma Design umsetzen",
+            "description": "Grunddesign von Figma umsetzen",
+            "date": "2025-02-15",
+            "priority": "urgent",
+            "contacts": [1, 2, 6, 7]
+        }
+    },
+    {
+        "model": "join_app.task",
+        "pk": 4,
+        "fields": {
+            "columnID": "Done",
+            "category": "Technical Task",
+            "title": "Projekt initialisieren",
+            "description": "Projekt neu aufsetzen",
+            "date": "2025-02-10",
+            "priority": "urgent",
+            "contacts": [9, 10]
+        }
+    },
+    {
+        "model": "join_app.subtask",
+        "pk": 1,
+        "fields": {
+            "subtaskTitle": "CSS Klassen für Buttons",
+            "status": "done",
+            "task": 2
+        }
+    },
+    {
+        "model": "join_app.subtask",
+        "pk": 2,
+        "fields": {
+            "subtaskTitle": "CSS Klassen für Abstände",
+            "status": "open",
+            "task": 2
+        }
+    },
+    {
+        "model": "join_app.subtask",
+        "pk": 3,
+        "fields": {
+            "subtaskTitle": "Login Seite fertigstellen",
+            "status": "done",
+            "task": 3
+        }
+    },
+    {
+        "model": "join_app.subtask",
+        "pk": 4,
+        "fields": {
+            "subtaskTitle": "Registrierungsseite fertigstellen",
+            "status": "done",
+            "task": 3
+        }
+    },
+    {
+        "model": "join_app.subtask",
+        "pk": 5,
+        "fields": {
+            "subtaskTitle": "Header einfügen",
+            "status": "done",
+            "task": 3
+        }
+    },
+    {
+        "model": "join_app.subtask",
+        "pk": 6,
+        "fields": {
+            "subtaskTitle": "GitHub Repositiory erstellen",
+            "status": "done",
+            "task": 4
+        }
+    },
+    {
+        "model": "join_app.subtask",
+        "pk": 7,
+        "fields": {
+            "subtaskTitle": "Kollegen einladen",
+            "status": "done",
+            "task": 4
+        }
+    }
+  ]
