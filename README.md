@@ -16,9 +16,9 @@ This project is part of the Join-200 (Frontend).
     python -m venv env
 ```
 
-3. Install the dependencies:<br/>
-activate the virtual environment
+3. Install the dependencies:
 ```
+    activate the virtual environment
     pip install -r requirements.txt
 ```
 
